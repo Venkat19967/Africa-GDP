@@ -64,7 +64,7 @@ function drawMap() {
 
   // get the selected year based on the input box's value
   var year = document.getElementById("year-input").value;
-  
+
   // get the GDP values for countries for the selected year
   let yearData = timeData.filter( d => d.Year == year)[0];
   
@@ -72,8 +72,18 @@ function drawMap() {
   let extent = getExtentsForYear(yearData);
 
   // get the selected color scale based on the dropdown value
-  var colorScale = d3.scaleSequential(d3.interpolateRdYlGn)
+  var colorval = document.getElementById("color-scale-select").value;
+  if (colorval == "interpolateRdYlGn") {
+    var colorScale = d3.scaleSequential(d3.interpolateRdYlGn)
                      .domain(extent);
+  } else if(colorval == "interpolateViridis") {
+    var colorScale = d3.scaleSequential(d3.interpolateViridis)
+                     .domain(extent);
+  } else {
+    var colorScale = d3.scaleSequential(d3.interpolateBrBG)
+                     .domain(extent);
+  }
+  
 
   
   // draw the map on the #map svg
@@ -103,7 +113,7 @@ function drawMap() {
     .on('click', function(d,i) {
       console.log('clicked on ' + d.properties.name);
     });
-    
+
 }
 
 
