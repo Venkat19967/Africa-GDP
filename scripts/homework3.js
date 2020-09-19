@@ -79,10 +79,16 @@ function drawMap() {
   } else if(colorval == "interpolateViridis") {
     var colorScale = d3.scaleSequential(d3.interpolateViridis)
                      .domain(extent);
-  } else {
+  } else if(colorval == "interpolateBrBG") {
     var colorScale = d3.scaleSequential(d3.interpolateBrBG)
                      .domain(extent);
-  }
+  } else if(colorval == "interpolateRdYlBu") {
+    var colorScale = d3.scaleSequential(d3.interpolateRdYlBu)
+                     .domain(extent);
+  } else {
+    var colorScale = d3.scaleSequential(d3.interpolateBlues)
+                     .domain(extent);
+  } 
   
 
   
@@ -102,7 +108,7 @@ function drawMap() {
       return colorScale(val);
     })
     .on('mouseover', function(d,i) {
-      console.log('mouseover on ' + d.properties.name);
+      console.log('mouseover on ' + yearData[d.properties.name]);
     })
     .on('mousemove',function(d,i) {
       console.log('mousemove on ' + d.properties.name);
