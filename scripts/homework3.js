@@ -73,23 +73,9 @@ function drawMap() {
 
   // get the selected color scale based on the dropdown value
   var colorval = document.getElementById("color-scale-select").value;
-  if (colorval == "interpolateRdYlGn") {
-    var colorScale = d3.scaleSequential(d3.interpolateRdYlGn)
+
+    var colorScale = d3.scaleSequential(window["d3"][colorval])
                      .domain(extent);
-  } else if(colorval == "interpolateViridis") {
-    var colorScale = d3.scaleSequential(d3.interpolateViridis)
-                     .domain(extent);
-  } else if(colorval == "interpolateBrBG") {
-    var colorScale = d3.scaleSequential(d3.interpolateBrBG)
-                     .domain(extent);
-  } else if(colorval == "interpolateRdYlBu") {
-    var colorScale = d3.scaleSequential(d3.interpolateRdYlBu)
-                     .domain(extent);
-  } else {
-    var colorScale = d3.scaleSequential(d3.interpolateBlues)
-                     .domain(extent);
-  } 
-  
 
   
   // draw the map on the #map svg
