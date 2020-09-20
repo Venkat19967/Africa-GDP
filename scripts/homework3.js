@@ -1,6 +1,4 @@
-
 var mapSvg;
-
 var lineSvg;
 var lineWidth;
 var lineHeight;
@@ -52,6 +50,9 @@ function getExtentsForYear(yearData) {
 
 // Draw the map in the #map svg
 function drawMap() {
+  
+  d3.select("#linear-gradient").remove();
+  d3.selectAll('.tick').remove();
 
   // create the map projection and geoPath
   let projection = d3.geoMercator()
@@ -74,7 +75,7 @@ function drawMap() {
   // get the selected color scale based on the dropdown value
   var colorval = document.getElementById("color-scale-select").value;
 
-    var colorScale = d3.scaleSequential(window["d3"][colorval])
+  var colorScale = d3.scaleSequential(window["d3"][colorval])
                      .domain(extent);
 
   
@@ -85,16 +86,16 @@ function drawMap() {
     .enter()
     .append('path')
     .attr('d', path)
-    .attr('id', d => { return d.properties.name})
+    .attr('id', d => {return d.properties.name})
     .attr('class','countrymap')
     .style('fill', d => {
       let val = +yearData[d.properties.name];
-      if(isNaN(val)) 
+      if(isNaN(val) || val == 0) 
         return 'white';
       return colorScale(val);
     })
     .on('mouseover', function(d,i) {
-      console.log('mouseover on ' + yearData[d.properties.name]);
+      console.log('mouseover on ' +yearData[d.properties.name]);
     })
     .on('mousemove',function(d,i) {
       console.log('mousemove on ' + d.properties.name);
@@ -106,11 +107,56 @@ function drawMap() {
       console.log('clicked on ' + d.properties.name);
     });
 
+
+
+  var barHeight = 20;
+  var colorScale_legend = d3.scaleSequential(window["d3"][colorval]).domain(extent);
+
+  var axisScale = d3.scaleLinear()
+    .domain(colorScale_legend.domain())
+    .range([0,220]);
+
+  var axisBottom = g => g
+  .attr("class", `x-axis`)
+  .attr("transform", `translate(20,500)`)
+  .call(d3.axisBottom(axisScale)
+    .ticks(7)
+    .tickSize(-barHeight));
+
+  let defs = mapSvg.append("defs");
+   
+  let linearGradient = defs.append("linearGradient")
+      .attr("id", "linear-gradient");
+
+  linearGradient.selectAll("stop")
+      .data(colorScale_legend.ticks().map((t, i, n) => ({ offset: `${100*i/n.length}%`, color: colorScale_legend(t)})))
+      .enter().append("stop")
+      .attr("offset", d => d.offset)
+      .attr("stop-color", d => d.color);
+
+  mapSvg.append('g')
+      .attr("transform", `translate(20,480)`)
+      .attr("id", "rect_g")
+      .append("rect")
+    .attr("width", 220)
+    .attr("height", 20)
+    .style("fill", "url(#linear-gradient)");
+    
+    // .style("fill", colorScale(5));
+  mapSvg.append('g')
+    .call(axisBottom);
+
+    d3.selectAll('line').attr('stroke','white');
+    d3.selectAll('path').attr('stroke','white');
+    
+
 }
+
 
 
 // Draw the line chart in the #linechart svg for
 // the country argument (e.g., `Algeria').
+
 function drawLineChart(country) {
 
   if(!country)
