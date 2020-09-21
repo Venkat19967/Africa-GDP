@@ -22,9 +22,27 @@ html {
 
 .countrymap {
   stroke: black;
+  stroke-width: 1px;
+}
+
+.countrymap_hover {
+  stroke: cyan;
+  stroke-width: 4px;
 }
 
 
 h2, h3 {
   text-align:center;
+}
+
+div.tooltip-map {
+  position: absolute;
+  text-align: left;
+  padding: .5rem;
+  background: #ffffff;
+  color: #000000;
+  border: 1px solid #000000;
+  border-radius: 8px;
+  pointer-events: none;
+  font-size: 1.3rem;
 }

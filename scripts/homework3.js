@@ -50,7 +50,7 @@ function getExtentsForYear(yearData) {
 
 // Draw the map in the #map svg
 function drawMap() {
-  
+
   d3.select("#linear-gradient").remove();
   d3.selectAll('.tick').remove();
 
@@ -78,6 +78,9 @@ function drawMap() {
   var colorScale = d3.scaleSequential(window["d3"][colorval])
                      .domain(extent);
 
+  var div = d3.select("body").append("div")
+  .attr("class", "tooltip-map")
+  .style("opacity", 0);
   
   // draw the map on the #map svg
   let g = mapSvg.append('g');
@@ -96,12 +99,28 @@ function drawMap() {
     })
     .on('mouseover', function(d,i) {
       console.log('mouseover on ' +yearData[d.properties.name]);
+      d3.select(this).transition()
+               .attr('class', 'countrymap_hover');
+      div.transition()
+            .duration(50)
+            .style("opacity", 1);
+      div.html(`Country: ${d.properties.name} <br />GDP: ${+yearData[d.properties.name]}`)
+      .style("left", (d3.event.pageX) + 10 + "px")
+      .style("top", (d3.event.pageY) + 10 + "px");
     })
     .on('mousemove',function(d,i) {
       console.log('mousemove on ' + d.properties.name);
+      div.html(`Country: ${d.properties.name} <br /> GDP: ${+yearData[d.properties.name]}`)
+      .style("left", (d3.event.pageX) + 10 + "px")
+      .style("top", (d3.event.pageY) + 10 + "px");
     })
     .on('mouseout', function(d,i) {
       console.log('mouseout on ' + d.properties.name);
+      d3.select(this).transition()
+               .attr('class', 'countrymap');
+      div.transition()
+               .duration(50)
+               .style("opacity", 0);
     })
     .on('click', function(d,i) {
       console.log('clicked on ' + d.properties.name);
