@@ -8,6 +8,7 @@ var lineMargin = { top: 20, right: 60, bottom: 60, left: 100 };
 
 var mapData;
 var timeData;
+var Country
 
 // This runs when the page is loaded
 document.addEventListener('DOMContentLoaded', function() {
@@ -64,7 +65,7 @@ function drawMap() {
                .projection(projection);
 
   // get the selected year based on the input box's value
-  var year = document.getElementById("year-input").value;
+  let year = document.getElementById("year-input").value;
 
   // get the GDP values for countries for the selected year
   let yearData = timeData.filter( d => d.Year == year)[0];
@@ -123,6 +124,9 @@ function drawMap() {
                .style("opacity", 0);
     })
     .on('click', function(d,i) {
+
+      Country = d.properties.name;
+      drawLineChart(Country);
       console.log('clicked on ' + d.properties.name);
     });
 
@@ -177,6 +181,57 @@ function drawMap() {
 // the country argument (e.g., `Algeria').
 
 function drawLineChart(country) {
+
+  var node = document.getElementById('linechart');
+  node.innerHTML = "";
+  console.log(lineHeight);
+  console.log((lineHeight - lineInnerHeight)/2 + lineInnerHeight);
+
+  let year = document.getElementById("year-input").value;
+  let countryData = [];
+  console.log(countryData);
+  timeData.forEach(d => {
+    if(country in d){
+      countryData.push({
+        Year : String(d.Year),
+        GDP : d[String(country)],
+      });
+    }
+  });
+
+  console.log(countryData);
+
+  // console.log(lineInnerHeight);
+
+  lineSvg.append("svg")
+  .attr("width", lineWidth)
+  .attr("height", lineHeight)
+  .append("g");
+
+  var x = d3.scaleTime()
+      .domain(d3.extent(countryData, function(d) { return +d.Year;}))
+      .range([ 0, lineInnerWidth ]);
+    lineSvg.append("g")
+      .attr("transform", "translate(" + (lineWidth - lineInnerWidth)/2 +"," + ((lineHeight - lineInnerHeight)/2 + lineInnerHeight) + ")")
+      .call(d3.axisBottom(x));
+
+    var y = d3.scaleLinear()
+      .domain([0, d3.max(countryData, function(d) { return +d.GDP; })])
+      .range([ lineInnerHeight, 0 ]);
+    lineSvg.append("g")
+    .attr("transform", "translate("+ (lineWidth - lineInnerWidth)/2 + "," + (lineHeight - lineInnerHeight)/2 +")")
+      .call(d3.axisLeft(y));
+
+      lineSvg.append("path")
+      .datum(countryData)
+      .attr("fill", "none")
+      .attr("stroke", "steelblue")
+      .attr("stroke-width", 1.5)
+      .attr("transform", "translate("+ (lineWidth - lineInnerWidth)/2 + "," + (lineHeight - lineInnerHeight)/2 +")")
+      .attr("d", d3.line()
+        .x(function(d) { return x(+d.Year) })
+        .y(function(d) { return y(+d.GDP) })
+        );
 
   if(!country)
     return;
