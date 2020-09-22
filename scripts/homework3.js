@@ -208,30 +208,68 @@ function drawLineChart(country) {
   .attr("height", lineHeight)
   .append("g");
 
-  var x = d3.scaleTime()
+  var x = d3.scaleLinear()
       .domain(d3.extent(countryData, function(d) { return +d.Year;}))
       .range([ 0, lineInnerWidth ]);
+
     lineSvg.append("g")
       .attr("transform", "translate(" + (lineWidth - lineInnerWidth)/2 +"," + ((lineHeight - lineInnerHeight)/2 + lineInnerHeight) + ")")
-      .call(d3.axisBottom(x));
+      .call(d3.axisBottom(x)
+      .ticks(d3.timeYear.every(10))
+      .ticks(10)
+      );
 
     var y = d3.scaleLinear()
       .domain([0, d3.max(countryData, function(d) { return +d.GDP; })])
       .range([ lineInnerHeight, 0 ]);
+
+
     lineSvg.append("g")
     .attr("transform", "translate("+ (lineWidth - lineInnerWidth)/2 + "," + (lineHeight - lineInnerHeight)/2 +")")
-      .call(d3.axisLeft(y));
+      .call(d3.axisLeft(y).tickSize(-lineInnerWidth))
+      .call(g => g.select(".domain").remove())
+      .call(g => g.selectAll(".tick:not(:first-of-type) line")
+      .attr("stroke-opacity", 0.5)
+      .attr("stroke-dasharray", "5,10")
+      );
+
+      lineSvg.selectAll(".tick text")
+      .style('fill', 'gray');
+
+      lineSvg.selectAll(".tick line")
+      .style('stroke', 'gray');
+
 
       lineSvg.append("path")
       .datum(countryData)
       .attr("fill", "none")
-      .attr("stroke", "steelblue")
-      .attr("stroke-width", 1.5)
+      .attr("stroke", "black")
+      .attr("stroke-width", 2)
       .attr("transform", "translate("+ (lineWidth - lineInnerWidth)/2 + "," + (lineHeight - lineInnerHeight)/2 +")")
       .attr("d", d3.line()
         .x(function(d) { return x(+d.Year) })
         .y(function(d) { return y(+d.GDP) })
         );
+
+        lineSvg.append("text")
+        .attr("text-anchor", "middle")
+        .attr("transform", "rotate(-90)")
+        .attr("y", 40)
+        .attr("x", -lineHeight/2)
+        .attr("font-family", "sans-serif")
+        .attr("font-size", "18px")
+        .style('fill', 'gray')
+        .text(`GDP of ${country} (based on current USD)`)
+
+
+        lineSvg.append("text")
+        .attr("text-anchor", "middle")
+        .attr("x", lineWidth/2)
+        .attr("y", lineHeight -5)
+        .attr("font-family", "sans-serif")
+        .attr("font-size", "17px")
+        .style('fill', 'gray')
+        .text("Year");
 
   if(!country)
     return;
