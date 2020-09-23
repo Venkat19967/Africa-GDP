@@ -9,6 +9,7 @@ var lineMargin = { top: 20, right: 60, bottom: 60, left: 100 };
 var mapData;
 var timeData;
 var Country
+var div;
 
 // This runs when the page is loaded
 document.addEventListener('DOMContentLoaded', function() {
@@ -18,6 +19,10 @@ document.addEventListener('DOMContentLoaded', function() {
   lineHeight = +lineSvg.style('height').replace('px','');;
   lineInnerWidth = lineWidth - lineMargin.left - lineMargin.right;
   lineInnerHeight = lineHeight - lineMargin.top - lineMargin.bottom;
+
+  div = d3.select("body").append("div")
+  .attr("class", "tooltip-map")
+  .style("opacity", 0);
 
   // Load both files before doing anything else
   Promise.all([d3.json('data/africa.geojson'),
@@ -79,9 +84,7 @@ function drawMap() {
   var colorScale = d3.scaleSequential(window["d3"][colorval])
                      .domain(extent);
 
-  var div = d3.select("body").append("div")
-  .attr("class", "tooltip-map")
-  .style("opacity", 0);
+ 
   
   // draw the map on the #map svg
   let g = mapSvg.append('g');
@@ -176,10 +179,8 @@ function drawMap() {
 }
 
 
-
 // Draw the line chart in the #linechart svg for
 // the country argument (e.g., `Algeria').
-
 function drawLineChart(country) {
 
   var node = document.getElementById('linechart');
@@ -189,7 +190,6 @@ function drawLineChart(country) {
 
   let year = document.getElementById("year-input").value;
   let countryData = [];
-  console.log(countryData);
   timeData.forEach(d => {
     if(country in d){
       countryData.push({
@@ -199,10 +199,7 @@ function drawLineChart(country) {
     }
   });
 
-  console.log(countryData);
-
-  // console.log(lineInnerHeight);
-
+  //
   lineSvg.append("svg")
   .attr("width", lineWidth)
   .attr("height", lineHeight)
@@ -212,64 +209,91 @@ function drawLineChart(country) {
       .domain(d3.extent(countryData, function(d) { return +d.Year;}))
       .range([ 0, lineInnerWidth ]);
 
-    lineSvg.append("g")
-      .attr("transform", "translate(" + (lineWidth - lineInnerWidth)/2 +"," + ((lineHeight - lineInnerHeight)/2 + lineInnerHeight) + ")")
-      .call(d3.axisBottom(x)
-      .ticks(d3.timeYear.every(10))
-      .ticks(10)
-      );
+  lineSvg.append("g")
+  .attr("id", "line")
+    .attr("transform", "translate(" + (lineWidth - lineInnerWidth)/2 +"," + ((lineHeight - lineInnerHeight)/2 + lineInnerHeight) + ")")
+    .call(d3.axisBottom(x)
+    .tickFormat(d3.format("d"))
+  
+    );
 
-    var y = d3.scaleLinear()
-      .domain([0, d3.max(countryData, function(d) { return +d.GDP; })])
-      .range([ lineInnerHeight, 0 ]);
+    var ticks = d3.selectAll(".tick text");
+ticks.each(function(_,i){
+    if(i%2 == 0) d3.select(this).remove();
+});
+    
 
-
-    lineSvg.append("g")
-    .attr("transform", "translate("+ (lineWidth - lineInnerWidth)/2 + "," + (lineHeight - lineInnerHeight)/2 +")")
-      .call(d3.axisLeft(y).tickSize(-lineInnerWidth))
-      .call(g => g.select(".domain").remove())
-      .call(g => g.selectAll(".tick:not(:first-of-type) line")
-      .attr("stroke-opacity", 0.5)
-      .attr("stroke-dasharray", "5,10")
-      );
-
-      lineSvg.selectAll(".tick text")
-      .style('fill', 'gray');
-
-      lineSvg.selectAll(".tick line")
-      .style('stroke', 'gray');
+  var y = d3.scaleLinear()
+    .domain([0, d3.max(countryData, function(d) { return +d.GDP; })])
+    .range([ lineInnerHeight, 0 ]);
 
 
-      lineSvg.append("path")
-      .datum(countryData)
-      .attr("fill", "none")
-      .attr("stroke", "black")
-      .attr("stroke-width", 2)
-      .attr("transform", "translate("+ (lineWidth - lineInnerWidth)/2 + "," + (lineHeight - lineInnerHeight)/2 +")")
-      .attr("d", d3.line()
-        .x(function(d) { return x(+d.Year) })
-        .y(function(d) { return y(+d.GDP) })
-        );
+  lineSvg.append("g")
+  .attr("transform", "translate("+ (lineWidth - lineInnerWidth)/2 + "," + (lineHeight - lineInnerHeight)/2 +")")
+    .call(d3.axisLeft(y).tickSize(-lineInnerWidth))
+    .call(g => g.select(".domain").remove())
+    .call(g => g.selectAll(".tick:not(:first-of-type) line")
+    .attr("stroke-opacity", 0.5)
+    .attr("stroke-dasharray", "5,10")
+    );
 
-        lineSvg.append("text")
-        .attr("text-anchor", "middle")
-        .attr("transform", "rotate(-90)")
-        .attr("y", 40)
-        .attr("x", -lineHeight/2)
-        .attr("font-family", "sans-serif")
-        .attr("font-size", "18px")
-        .style('fill', 'gray')
-        .text(`GDP of ${country} (based on current USD)`)
+  lineSvg.selectAll(".tick text")
+  .attr('fill', 'gray');
+
+  lineSvg.selectAll(".tick line")
+  .attr('stroke', 'gray');
 
 
-        lineSvg.append("text")
-        .attr("text-anchor", "middle")
-        .attr("x", lineWidth/2)
-        .attr("y", lineHeight -5)
-        .attr("font-family", "sans-serif")
-        .attr("font-size", "17px")
-        .style('fill', 'gray')
-        .text("Year");
+  lineSvg.append("path")
+  .datum(countryData)
+  // .attr("id", "line")
+  .attr("fill", "none")
+  .attr("stroke", "black")
+  .attr("stroke-width", 2)
+  .attr("transform", "translate("+ (lineWidth - lineInnerWidth)/2 + "," + (lineHeight - lineInnerHeight)/2 +")")
+  .attr("d", d3.line()
+    .x(function(d) { return x(+d.Year) })
+    .y(function(d) { return y(+d.GDP) })
+    );
+
+  lineSvg.append("text")
+  .attr("text-anchor", "middle")
+  .attr("transform", "rotate(-90)")
+  .attr("y", 40)
+  .attr("x", -lineHeight/2)
+  .attr("font-family", "sans-serif")
+  .attr("font-size", "18px")
+  .style('fill', 'gray')
+  .text(`GDP of ${country} (based on current USD)`)
+
+
+  lineSvg.append("text")
+  .attr("text-anchor", "middle")
+  .attr("x", lineWidth/2)
+  .attr("y", lineHeight -5)
+  .attr("font-family", "sans-serif")
+  .attr("font-size", "17px")
+  .style('fill', 'gray')
+  .text("Year");
+
+
+  lineSvg.select("#line")
+  .on('mouseover', function(d,i) {
+
+    div.transition()
+          .duration(50)
+          .style("opacity", 1);
+    div.html(`Country:  <br />GDP: `)
+    .style("left", (d3.event.pageX) + 10 + "px")
+    .style("top", (d3.event.pageY) + 10 + "px");
+  })
+  .on('mouseout', function(d,i) {
+    // console.log('mouseout on ' + d.properties.name);
+  
+    div.transition()
+             .duration(50)
+             .style("opacity", 0);
+  });
 
   if(!country)
     return;
