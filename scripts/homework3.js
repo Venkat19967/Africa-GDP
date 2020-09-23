@@ -183,6 +183,10 @@ function drawMap() {
 // the country argument (e.g., `Algeria').
 function drawLineChart(country) {
 
+  if(!country)
+    return;
+  
+
   var node = document.getElementById('linechart');
   node.innerHTML = "";
   console.log(lineHeight);
@@ -295,7 +299,79 @@ function drawLineChart(country) {
              .style("opacity", 0);
   });
 
-  if(!country)
-    return;
+
+  // for the hover on line chart
+  var focus = lineSvg
+    .append('g')
+    .attr("transform", "translate("+ 80 + "," + 40 +")")
+    .append('circle')
+      .style("fill", "none")
+      .attr("stroke", "black")
+      .attr('r', 8.5)
+      .style("opacity", 0);
+
+    // var focusText = lineSvg
+    //   .append('g')
+    //   .append('text')
+    //     .style("opacity", 0)
+    //     .attr("text-anchor", "left")
+    //     .attr("alignment-baseline", "middle");
+
+      lineSvg
+      .append('rect')
+      .style("fill", "none")
+      .style("pointer-events", "all")
+      .attr('width', 648)
+      .attr('height', 528)
+      .attr("transform", "translate("+ 80 + "," + 40 +")")
+      .on('mouseover', mouseover)
+      .on('mousemove', mousemove)
+      .on('mouseout', mouseout);
+
+      function mouseover() {
+        focus.style("opacity", 1)
+        // focusText.style("opacity",1)
+
+      }
+    // console.log(countryData[0].Year);
+      function mousemove() {
+        // recover coordinate we need
+        var x0 = x.invert(d3.mouse(this)[0]);
+        var i = bisect(countryData, x0, 1);
+        selectedData = 0//countryData.indexOf(countryData())
+        
+        y0 = 0
+        countryData.forEach(d => {
+          if (d.Year == parseInt(x0)) {
+            y0 = d.GDP;
+          }
+        })
+        console.log(y0)
+
+        focus
+          .attr("cx", x(x0))
+          .attr("cy", y(y0))
+
+          div.transition()
+          .duration(50)
+          .style("opacity", 1);
+    div.html(`Year: ${parseInt(x0)} <br />GDP: ${y0}`)
+    .style("left", (d3.event.pageX) + 10 + "px")
+    .style("top", (d3.event.pageY) + 10 + "px");
+
+
+        // focusText
+        //   .html("x:" + selectedData.x + "  -  " + "y:" + selectedData.y)
+        //   .attr("x", x(selectedData.x)+15)
+        //   .attr("y", y(selectedData.y))
+        }
+      function mouseout() {
+        focus.style("opacity", 0)
+        // focusText.style("opacity", 0)
+        div.transition()
+             .duration(50)
+             .style("opacity", 0);
+      }
+      var bisect = d3.bisector(function(d) { return d.x; }).left;
   
 }
