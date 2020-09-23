@@ -217,10 +217,10 @@ function drawLineChart(country) {
   
     );
 
-    var ticks = d3.selectAll(".tick text");
-ticks.each(function(_,i){
-    if(i%2 == 0) d3.select(this).remove();
-});
+//     var ticks = d3.selectAll(".tick text");
+// ticks.each(function(_,i){
+//     if(i%2 == 0) d3.select(this).remove();
+// });
     
 
   var y = d3.scaleLinear()
