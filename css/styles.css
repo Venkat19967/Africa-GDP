@@ -47,6 +47,6 @@ div.tooltip-map {
   font-size: 1.3rem;
 }
 
-.tick:nth-child(2n-1) text {
+/* .tick:nth-child(2n-1) text {
   visibility: hidden; 
-}
+} */

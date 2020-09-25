@@ -186,13 +186,12 @@ function drawLineChart(country) {
   if(!country)
     return;
   
-
   var node = document.getElementById('linechart');
   node.innerHTML = "";
-  console.log(lineHeight);
-  console.log((lineHeight - lineInnerHeight)/2 + lineInnerHeight);
 
   let year = document.getElementById("year-input").value;
+
+  // Create country data object
   let countryData = [];
   timeData.forEach(d => {
     if(country in d){
@@ -203,7 +202,7 @@ function drawLineChart(country) {
     }
   });
 
-  //
+  // Creating the box for linechart
   lineSvg.append("svg")
   .attr("width", lineWidth)
   .attr("height", lineHeight)
@@ -221,10 +220,10 @@ function drawLineChart(country) {
   
     );
 
-//     var ticks = d3.selectAll(".tick text");
-// ticks.each(function(_,i){
-//     if(i%2 == 0) d3.select(this).remove();
-// });
+    var ticks = d3.selectAll("#line .tick text");
+ticks.each(function(_,i){
+    if(i%2 != 0) d3.select(this).remove();
+});
     
 
   var y = d3.scaleLinear()
@@ -337,41 +336,51 @@ function drawLineChart(country) {
       function mousemove() {
         // recover coordinate we need
         var x0 = x.invert(d3.mouse(this)[0]);
-        var i = bisect(countryData, x0, 1);
-        selectedData = 0//countryData.indexOf(countryData())
+        // let y0 = y.invert(d3.mouse(this)[0]);
+        let y0 = 0;
+        // let y0 = 0
+        let i = bisect(countryData, x0, 1);
+        // bisecty(countryData, y0, 1);
+        selectedData = countryData[i]
+        console.log(i);
+
+        // let j = bisecty()
+
+        // let y0 = y.invert(d3.mouse(this)[1]);
+        // let j = bisecty(countryData, y0, 1);
+        y0 = countryData[i].GDP;
         
-        y0 = 0
-        countryData.forEach(d => {
-          if (d.Year == parseInt(x0)) {
-            y0 = d.GDP;
-          }
-        })
-        console.log(y0)
+
+        // countryData.forEach(d => {
+        //   if (d.Year == parseInt(x0)) {
+        //     y0 = d.GDP;
+        //   }
+        // })
+    
+
 
         focus
-          .attr("cx", x(x0))
-          .attr("cy", y(y0))
+          .attr("cx", x(selectedData.Year))
+          .attr("cy", y(selectedData.GDP));
 
-          div.transition()
+        div.transition()
           .duration(50)
           .style("opacity", 1);
-    div.html(`Year: ${parseInt(x0)} <br />GDP: ${y0}`)
-    .style("left", (d3.event.pageX) + 10 + "px")
-    .style("top", (d3.event.pageY) + 10 + "px");
 
+        div.html(`Year: ${parseInt(x0)} <br/>GDP: ${y0}`)
+          .style("left", (d3.event.pageX) + 10 + "px")
+          .style("top", (d3.event.pageY) + 10 + "px");
 
-        // focusText
-        //   .html("x:" + selectedData.x + "  -  " + "y:" + selectedData.y)
-        //   .attr("x", x(selectedData.x)+15)
-        //   .attr("y", y(selectedData.y))
-        }
-      function mouseout() {
+      }
+      
+      
+        function mouseout() {
         focus.style("opacity", 0)
-        // focusText.style("opacity", 0)
         div.transition()
              .duration(50)
              .style("opacity", 0);
       }
-      var bisect = d3.bisector(function(d) { return d.x; }).left;
+      var bisect = d3.bisector(function(d) { return d.Year; }).left;
+      var bisecty = d3.bisector(function(d) { return d.GDP; }).left;
   
 }
