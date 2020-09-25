@@ -20,6 +20,12 @@ document.addEventListener('DOMContentLoaded', function() {
   lineInnerWidth = lineWidth - lineMargin.left - lineMargin.right;
   lineInnerHeight = lineHeight - lineMargin.top - lineMargin.bottom;
 
+  console.log(`linewidth: ${(lineInnerWidth-lineInnerWidth)/2 }`);
+  console.log(`lineinnerwidth: ${lineInnerWidth}`)
+  console.log(`lineHeight: ${lineHeight}`)
+  console.log(`lineinnerheight: ${lineInnerHeight}`)
+
+
   div = d3.select("body").append("div")
   .attr("class", "tooltip-map")
   .style("opacity", 0);
@@ -213,7 +219,7 @@ function drawLineChart(country) {
       .range([ 0, lineInnerWidth ]);
 
   lineSvg.append("g")
-  .attr("id", "line")
+   .attr("id", "line")
     .attr("transform", "translate(" + (lineWidth - lineInnerWidth)/2 +"," + ((lineHeight - lineInnerHeight)/2 + lineInnerHeight) + ")")
     .call(d3.axisBottom(x)
     .tickFormat(d3.format("d"))
@@ -320,9 +326,9 @@ ticks.each(function(_,i){
       .append('rect')
       .style("fill", "none")
       .style("pointer-events", "all")
-      .attr('width', 648)
-      .attr('height', 528)
-      .attr("transform", "translate("+ 80 + "," + 40 +")")
+      .attr('width', lineInnerWidth)
+      .attr('height', lineInnerHeight)
+      .attr("transform", "translate("+ (lineWidth-lineInnerWidth)/2 + "," + (lineHeight-lineInnerHeight)/2 +")")
       .on('mouseover', mouseover)
       .on('mousemove', mousemove)
       .on('mouseout', mouseout);
@@ -367,12 +373,12 @@ ticks.each(function(_,i){
           .duration(50)
           .style("opacity", 1);
 
-        div.html(`Year: ${parseInt(x0)} <br/>GDP: ${y0}`)
+        div.html(`Year: ${parseInt(selectedData.Year)} <br/>GDP: ${selectedData.GDP}`)
           .style("left", (d3.event.pageX) + 10 + "px")
           .style("top", (d3.event.pageY) + 10 + "px");
 
       }
-      
+
       
         function mouseout() {
         focus.style("opacity", 0)
@@ -381,6 +387,5 @@ ticks.each(function(_,i){
              .style("opacity", 0);
       }
       var bisect = d3.bisector(function(d) { return d.Year; }).left;
-      var bisecty = d3.bisector(function(d) { return d.GDP; }).left;
   
 }
