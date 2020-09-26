@@ -5,7 +5,6 @@ var lineHeight;
 var lineInnerHeight;
 var lineInnerWidth;
 var lineMargin = { top: 20, right: 60, bottom: 60, left: 100 };
-
 var mapData;
 var timeData;
 var Country
@@ -19,12 +18,6 @@ document.addEventListener('DOMContentLoaded', function() {
   lineHeight = +lineSvg.style('height').replace('px','');;
   lineInnerWidth = lineWidth - lineMargin.left - lineMargin.right;
   lineInnerHeight = lineHeight - lineMargin.top - lineMargin.bottom;
-
-  console.log(`linewidth: ${(lineInnerWidth-lineInnerWidth)/2 }`);
-  console.log(`lineinnerwidth: ${lineInnerWidth}`)
-  console.log(`lineHeight: ${lineHeight}`)
-  console.log(`lineinnerheight: ${lineInnerHeight}`)
-
 
   div = d3.select("body").append("div")
   .attr("class", "tooltip-map")
@@ -86,12 +79,8 @@ function drawMap() {
 
   // get the selected color scale based on the dropdown value
   var colorval = document.getElementById("color-scale-select").value;
+  var colorScale = d3.scaleSequential(window["d3"][colorval]).domain(extent);
 
-  var colorScale = d3.scaleSequential(window["d3"][colorval])
-                     .domain(extent);
-
- 
-  
   // draw the map on the #map svg
   let g = mapSvg.append('g');
   g.selectAll('path')
@@ -108,24 +97,24 @@ function drawMap() {
       return colorScale(val);
     })
     .on('mouseover', function(d,i) {
-      console.log('mouseover on ' +yearData[d.properties.name]);
+      // console.log('mouseover on ' +yearData[d.properties.name]);
       d3.select(this).transition()
-               .attr('class', 'countrymap_hover');
+        .attr('class', 'countrymap_hover');
       div.transition()
-            .duration(50)
-            .style("opacity", 1);
+        .duration(50)
+        .style("opacity", 1);
       div.html(`Country: ${d.properties.name} <br />GDP: ${+yearData[d.properties.name]}`)
       .style("left", (d3.event.pageX) + 10 + "px")
       .style("top", (d3.event.pageY) + 10 + "px");
     })
     .on('mousemove',function(d,i) {
-      console.log('mousemove on ' + d.properties.name);
+      // console.log('mousemove on ' + d.properties.name);
       div.html(`Country: ${d.properties.name} <br /> GDP: ${+yearData[d.properties.name]}`)
       .style("left", (d3.event.pageX) + 10 + "px")
       .style("top", (d3.event.pageY) + 10 + "px");
     })
     .on('mouseout', function(d,i) {
-      console.log('mouseout on ' + d.properties.name);
+      // console.log('mouseout on ' + d.properties.name);
       d3.select(this).transition()
                .attr('class', 'countrymap');
       div.transition()
@@ -133,10 +122,9 @@ function drawMap() {
                .style("opacity", 0);
     })
     .on('click', function(d,i) {
-
       Country = d.properties.name;
       drawLineChart(Country);
-      console.log('clicked on ' + d.properties.name);
+      // console.log('clicked on ' + d.properties.name);
     });
 
 
@@ -146,40 +134,39 @@ function drawMap() {
 
   var axisScale = d3.scaleLinear()
     .domain(colorScale_legend.domain())
-    .range([0,220]);
+    .range([0,230]);
 
   var axisBottom = g => g
-  .attr("class", `x-axis`)
-  .attr("transform", `translate(20,500)`)
-  .call(d3.axisBottom(axisScale)
+    .attr("class", `x-axis`)
+    .attr("transform", `translate(20,500)`)
+    .call(d3.axisBottom(axisScale)
     .ticks(7)
     .tickSize(-barHeight));
 
   let defs = mapSvg.append("defs");
    
   let linearGradient = defs.append("linearGradient")
-      .attr("id", "linear-gradient");
+    .attr("id", "linear-gradient");
 
   linearGradient.selectAll("stop")
-      .data(colorScale_legend.ticks().map((t, i, n) => ({ offset: `${100*i/n.length}%`, color: colorScale_legend(t)})))
-      .enter().append("stop")
-      .attr("offset", d => d.offset)
-      .attr("stop-color", d => d.color);
+    .data(colorScale_legend.ticks().map((t, i, n) => ({ offset: `${100*i/n.length}%`, color: colorScale_legend(t)})))
+    .enter().append("stop")
+    .attr("offset", d => d.offset)
+    .attr("stop-color", d => d.color);
 
   mapSvg.append('g')
-      .attr("transform", `translate(20,480)`)
-      .attr("id", "rect_g")
-      .append("rect")
-    .attr("width", 220)
+    .attr("transform", `translate(20,480)`)
+    .attr("id", "rect_g")
+    .append("rect")
+    .attr("width", 230)
     .attr("height", 20)
     .style("fill", "url(#linear-gradient)");
     
-    // .style("fill", colorScale(5));
   mapSvg.append('g')
     .call(axisBottom);
 
-    d3.selectAll('line').attr('stroke','white');
-    d3.selectAll('path').attr('stroke','white');
+  d3.selectAll('line').attr('stroke','white');
+  d3.selectAll('path').attr('stroke','white');
     
 
 }
@@ -230,6 +217,9 @@ function drawLineChart(country) {
 ticks.each(function(_,i){
     if(i%2 != 0) d3.select(this).remove();
 });
+
+
+
     
 
   var y = d3.scaleLinear()
@@ -252,10 +242,12 @@ ticks.each(function(_,i){
   lineSvg.selectAll(".tick line")
   .attr('stroke', 'gray');
 
+  lineSvg.selectAll(".domain")
+  .attr('stroke', 'gray');
+
 
   lineSvg.append("path")
   .datum(countryData)
-  // .attr("id", "line")
   .attr("fill", "none")
   .attr("stroke", "black")
   .attr("stroke-width", 2)
@@ -304,23 +296,15 @@ ticks.each(function(_,i){
              .style("opacity", 0);
   });
 
-
   // for the hover on line chart
   var focus = lineSvg
     .append('g')
-    .attr("transform", "translate("+ 80 + "," + 40 +")")
+    .attr("transform", "translate("+ (lineWidth-lineInnerWidth)/2 + "," + (lineHeight-lineInnerHeight)/2 +")")
     .append('circle')
       .style("fill", "none")
       .attr("stroke", "black")
-      .attr('r', 8.5)
+      .attr('r', 10)
       .style("opacity", 0);
-
-    // var focusText = lineSvg
-    //   .append('g')
-    //   .append('text')
-    //     .style("opacity", 0)
-    //     .attr("text-anchor", "left")
-    //     .attr("alignment-baseline", "middle");
 
       lineSvg
       .append('rect')
@@ -335,10 +319,8 @@ ticks.each(function(_,i){
 
       function mouseover() {
         focus.style("opacity", 1)
-        // focusText.style("opacity",1)
-
       }
-    // console.log(countryData[0].Year);
+
       function mousemove() {
         // recover coordinate we need
         var x0 = x.invert(d3.mouse(this)[0]);
@@ -348,22 +330,8 @@ ticks.each(function(_,i){
         let i = bisect(countryData, x0, 1);
         // bisecty(countryData, y0, 1);
         selectedData = countryData[i]
-        console.log(i);
 
-        // let j = bisecty()
-
-        // let y0 = y.invert(d3.mouse(this)[1]);
-        // let j = bisecty(countryData, y0, 1);
         y0 = countryData[i].GDP;
-        
-
-        // countryData.forEach(d => {
-        //   if (d.Year == parseInt(x0)) {
-        //     y0 = d.GDP;
-        //   }
-        // })
-    
-
 
         focus
           .attr("cx", x(selectedData.Year))
@@ -379,7 +347,6 @@ ticks.each(function(_,i){
 
       }
 
-      
         function mouseout() {
         focus.style("opacity", 0)
         div.transition()
