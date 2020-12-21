@@ -1,3 +1,6 @@
+# Firebase URL:
+[Africa GDP](https://africa-gdp.web.app/)
+
 # Linking D3 Charts and Adding Interactivity
 
 The purpose of this homework is to give you practice linking separate visualizations together in D3. By the end of this assignment you should learn how to:
